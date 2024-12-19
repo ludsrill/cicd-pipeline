@@ -63,15 +63,5 @@ pipeline {
                 }
             }
         }
-        stage('Trigger Deployment Pipeline') {
-            steps {
-                script {
-                    def branch = env.BRANCH_NAME
-                    def deployJob = branch == 'main' ? 'Deploy_to_main' : 'Deploy_to_dev'
-
-                    build job: deployJob, wait: false
-                }
-            }
-        }
     }
 }
