@@ -24,19 +24,9 @@ pipeline {
             steps {
                 script {
                     def branch = env.BRANCH_NAME
-                    def port = branch == 'main' ? '3000' : '3001'
-                    def imageName = "my-app:${branch}"
+                    def imageName = branch == 'main' ? 'ludsrill/nodemain:v1.0' : 'ludsrill/nodedev:v1.0'
+
                     sh "docker build -t ${imageName} ."
-                }
-            }
-        }
-        stage('Deploy') {
-            steps {
-                script {
-                    def branch = env.BRANCH_NAME
-                    def port = branch == 'main' ? '3000' : '3001'
-                    def imageName = "my-app:${branch}"
-                    sh "docker run -d -p ${port}:${port} ${imageName}"
                 }
             }
         }
@@ -49,10 +39,26 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
                             echo "${DOCKER_PASS}" | docker login -u "${DOCKER_USER}" --password-stdin
-                            docker tag ${imageName} ${imageName}
                             docker push ${imageName}
                         """
                     }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    def branch = env.BRANCH_NAME
+                    def port = branch == 'main' ? '3000' : '3001'
+                    def containerName = branch == 'main' ? 'main-container' : 'dev-container'
+                    def imageName = branch == 'main' ? 'ludsrill/nodemain:v1.0' : 'ludsrill/nodedev:v1.0'
+
+                    sh """
+                        docker ps -q --filter "name=${containerName}" | xargs -r docker stop
+                        docker ps -aq --filter "name=${containerName}" | xargs -r docker rm
+                    """
+
+                    sh "docker run -d --name ${containerName} -p ${port}:${port} ${imageName}"
                 }
             }
         }
@@ -66,7 +72,5 @@ pipeline {
                 }
             }
         }
-
-
     }
 }
