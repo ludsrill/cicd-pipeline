@@ -49,7 +49,8 @@ pipeline {
             steps {
                 script {
                     def branch = env.BRANCH_NAME
-                    def port = branch == 'main' ? '3000' : '3001'
+                    def hostPort = branch == 'main' ? '3000' : '3001'
+                    def containerPort = '3000'
                     def containerName = branch == 'main' ? 'main-container' : 'dev-container'
                     def imageName = branch == 'main' ? 'ludsrill/nodemain:v1.0' : 'ludsrill/nodedev:v1.0'
 
@@ -58,7 +59,7 @@ pipeline {
                         docker ps -aq --filter "name=${containerName}" | xargs -r docker rm
                     """
 
-                    sh "docker run -d --name ${containerName} -p ${port}:${port} ${imageName}"
+                    sh "docker run -d --name ${containerName} -p ${hostPort}:${containerPort} ${imageName}"
                 }
             }
         }
