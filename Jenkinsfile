@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     def branch = env.BRANCH_NAME
-                    def imageName = branch == 'main' ? 'your-dockerhub-username/nodemain:v1.0' : 'your-dockerhub-username/nodedev:v1.0'
+                    def imageName = branch == 'main' ? 'ludsrill/nodemain:v1.0' : 'ludsrill/nodedev:v1.0'
 
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
